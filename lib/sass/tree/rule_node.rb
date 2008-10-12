@@ -67,14 +67,20 @@ module Sass::Tree
         spaces = '  ' * tabs
         if @style == :compact
           attributes = attributes.map { |a| a.to_s(1) }.join(' ')
-          to_return << "#{total_rule} { #{attributes} }\n"
+          new_css_rule = "#{total_rule} { #{attributes} }\n"
         elsif @style == :compressed
           attributes = attributes.map { |a| a.to_s(1) }.join(';')
-          to_return << "#{total_rule}{#{attributes}}"
+          new_css_rule = "#{total_rule}{#{attributes}}"
         else
           attributes = attributes.map { |a| a.to_s(tabs + 1) }.join("\n")
           end_attrs = (@style == :expanded ? "\n" + old_spaces : ' ')
-          to_return << "#{total_rule} {\n#{attributes}#{end_attrs}}\n"
+          new_css_rule = "#{total_rule} {\n#{attributes}#{end_attrs}}\n"
+        end
+        to_return << new_css_rule
+        
+        if total_rule =~ /input\[type=.*?\]/m
+          ie6_input_fix = new_css_rule.gsub(/\[type=(.*?)\]/mi, '.type_\1')
+          to_return << ie6_input_fix
         end
       end
 
